@@ -171,6 +171,10 @@ import org.reactivestreams.Subscriber
       import StreamSubscriptionTimeoutTerminationMode._
       if (!primaryOutputs.subscribed) {
         timeoutMode match {
+          case CancelWithWarnTermination =>
+            log.warning("Subscription timeout for {}", this)
+            primaryInputs.cancel()
+            context.stop(self)
           case CancelTermination =>
             primaryInputs.cancel()
             context.stop(self)

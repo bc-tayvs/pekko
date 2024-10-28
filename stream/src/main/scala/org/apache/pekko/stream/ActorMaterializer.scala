@@ -888,6 +888,7 @@ object StreamSubscriptionTimeoutSettings {
         case "no" | "off" | "false" | "noop" => NoopTermination
         case "warn"                          => WarnTermination
         case "cancel"                        => CancelTermination
+        case "cancel-with-warn"              => CancelWithWarnTermination
       }, timeout = c.getDuration("timeout", TimeUnit.MILLISECONDS).millis)
   }
 }
@@ -922,6 +923,7 @@ object StreamSubscriptionTimeoutTerminationMode {
   case object NoopTermination extends StreamSubscriptionTimeoutTerminationMode
   case object WarnTermination extends StreamSubscriptionTimeoutTerminationMode
   case object CancelTermination extends StreamSubscriptionTimeoutTerminationMode
+  case object CancelWithWarnTermination extends StreamSubscriptionTimeoutTerminationMode
 
   /**
    * Do not do anything when timeout expires.
@@ -937,5 +939,10 @@ object StreamSubscriptionTimeoutTerminationMode {
    * When the timeout expires attach a Subscriber that will immediately cancel its subscription.
    */
   def cancel: StreamSubscriptionTimeoutTerminationMode = CancelTermination
+
+  /**
+   * When the timeout expires log a warning and attach a Subscriber that will immediately cancel its subscription.
+   */
+  def cancelWithWarn: StreamSubscriptionTimeoutTerminationMode = CancelTermination
 
 }

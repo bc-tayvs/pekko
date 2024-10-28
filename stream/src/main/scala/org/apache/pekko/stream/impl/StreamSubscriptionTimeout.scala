@@ -16,13 +16,16 @@ package org.apache.pekko.stream.impl
 import scala.annotation.nowarn
 import scala.concurrent.duration.FiniteDuration
 import scala.util.control.NoStackTrace
-
 import org.apache.pekko
 import pekko.actor._
 import pekko.annotation.InternalApi
 import pekko.stream.StreamSubscriptionTimeoutSettings
-import pekko.stream.StreamSubscriptionTimeoutTerminationMode.{ CancelTermination, NoopTermination, WarnTermination }
-
+import pekko.stream.StreamSubscriptionTimeoutTerminationMode.{
+  CancelTermination,
+  CancelWithWarnTermination,
+  NoopTermination,
+  WarnTermination
+}
 import org.reactivestreams._
 
 /**
@@ -126,9 +129,13 @@ import org.reactivestreams._
    */
   @nowarn("msg=deprecated")
   protected def subscriptionTimedOut(target: Publisher[_]): Unit = subscriptionTimeoutSettings.mode match {
-    case NoopTermination   => // ignore...
-    case WarnTermination   => warn(target, subscriptionTimeoutSettings.timeout)
+    case NoopTermination => // ignore...
+    case WarnTermination => warn(target, subscriptionTimeoutSettings.timeout)
+    case CancelWithWarnTermination =>
+      warn(target, subscriptionTimeoutSettings.timeout)
+      cancel(target, subscriptionTimeoutSettings.timeout)
     case CancelTermination => cancel(target, subscriptionTimeoutSettings.timeout)
+
   }
 
   /**

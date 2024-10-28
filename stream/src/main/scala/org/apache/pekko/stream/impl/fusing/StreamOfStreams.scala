@@ -179,6 +179,13 @@ import pekko.util.ccompat.JavaConverters._
         inheritedAttributes.mandatoryAttribute[ActorAttributes.StreamSubscriptionTimeout]
 
       mode match {
+        case StreamSubscriptionTimeoutTerminationMode.CancelWithWarnTermination =>
+          materializer.logger.warning(
+            "Substream subscription timeout triggered after {} in prefixAndTail({}).",
+            timeout,
+            n)
+          tailSource.timeout(timeout)
+          if (tailSource.isClosed) completeStage()
         case StreamSubscriptionTimeoutTerminationMode.CancelTermination =>
           tailSource.timeout(timeout)
           if (tailSource.isClosed) completeStage()
